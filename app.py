@@ -52,7 +52,7 @@ def add_text_below_qr(qr_image, number, timestamp):
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     
     # Load fonts
-    font_number = ImageFont.truetype(font_path, 18)  # 4-digit number (now 18pt)
+    font_number = ImageFont.truetype(font_path, 24)  # 4-digit number (now 18pt)
     font_title = ImageFont.truetype(font_path, 36)  # "Oficinas" & "Abertas" in 36pt
     font_timestamp = ImageFont.truetype(font_path, 18)  # Timestamp (now 18pt)
 
@@ -75,7 +75,7 @@ def add_text_below_qr(qr_image, number, timestamp):
         draw.text((x_pos, y_offset), text, fill="black", font=font)
 
     # Position all text elements centered
-    number_y = qr_height + 10  # 10px below QR code
+    number_y = qr_height + 5  # 10px below QR code
     oficinas_y = number_y + 30  # 30px below the number
     abertas_y = oficinas_y + 45  # 45px below "Oficinas"
     timestamp_y = abertas_y + 45  # 45px below "Abertas"
