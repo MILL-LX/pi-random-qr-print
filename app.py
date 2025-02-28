@@ -45,16 +45,16 @@ def generate_qr_code():
         print(f"Error generating QR code: {e}")
 
 def add_text_below_qr(qr_image, text):
-    """Adds the given text below the QR code."""
-    # Set up font (fallback to default if a font file is not available)
-    try:
-        font = ImageFont.truetype("arial.ttf", 72)  # Font size increased to 72
-    except IOError:
-        font = ImageFont.load_default()
+    """Adds the given text below the QR code using DejaVuSans-Bold.ttf at size 72."""
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    font_size = 72
+
+    # Load the DejaVuSans-Bold font
+    font = ImageFont.truetype(font_path, font_size)
 
     # Get image size
     qr_width, qr_height = qr_image.size
-    text_height = 120  # Increased space for larger text
+    text_height = 120  # Extra space for large text
 
     # Create new image with extra space for text
     new_img = Image.new("RGB", (qr_width, qr_height + text_height), "white")
@@ -62,10 +62,10 @@ def add_text_below_qr(qr_image, text):
 
     # Draw text on the new image
     draw = ImageDraw.Draw(new_img)
-    bbox = draw.textbbox((0, 0), text, font=font)  # Corrected method
+    bbox = draw.textbbox((0, 0), text, font=font)  # Get text size
     text_width = bbox[2] - bbox[0]  # Calculate text width
     text_x = (qr_width - text_width) // 2
-    text_y = qr_height + 20  # Position text slightly lower for better spacing
+    text_y = qr_height + 20  # Adjusted for spacing
 
     draw.text((text_x, text_y), text, fill="black", font=font)
 
