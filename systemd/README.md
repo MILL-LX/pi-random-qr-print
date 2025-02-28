@@ -3,8 +3,8 @@
 This application can start up automatically on reboot of your Raspberry Pi. Use the following commands to install the service, start it, and enable it to start up on reboot:
 
 ```bash
-cd /home/pi/repos/pi-video-streamer
-sudo cp systemd/pi-video-streamer.service /etc/systemd/system
+cd /home/pi/repos/pi-random-qr-print
+sudo cp systemd/pi-random-qr-print.service /etc/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl stop pi-random-qr-print.service
 sudo systemctl start pi-random-qr-print.service
