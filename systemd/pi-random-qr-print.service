@@ -1,0 +1,14 @@
+[Unit]
+Description=Raspberry Pi Random QR Code Printer 
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/repos/pi-random-qr-print
+ExecStart=/usr/bin/bash -c '/home/pi/.local/bin/uv run python app.py'
+Restart=on-failure
+RestartSec=30s
+StartLimitBurst=3
+StartLimitIntervalSec=60
+
+[Install]
+WantedBy=multi-user.target
