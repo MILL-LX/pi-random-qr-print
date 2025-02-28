@@ -1,7 +1,7 @@
 import os
 import random
 import qrcode
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import RPi.GPIO as GPIO
 import time
 import atexit
@@ -15,7 +15,7 @@ def setup_gpio():
     GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
 
 def generate_qr_code():
-    """Generates and saves a QR code with a random 4-digit number."""
+    """Generates and saves a QR code with a random 4-digit number, adding the number below the QR code."""
     number = "".join(random.sample("0123456789", 4))  # Unique 4-digit number
     print(f"Generating QR Code for: {number}")
 
@@ -23,20 +23,53 @@ def generate_qr_code():
         os.makedirs("data")
 
     try:
+        # Generate QR code
         qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
         qr.add_data(number)
         qr.make(fit=True)
 
         img = qr.make_image(fill="black", back_color="white")
         img = img.convert("RGB")
+
+        # Add text below the QR code
+        img_with_text = add_text_below_qr(img, number)
+
+        # Save final image
         filename = f"data/qr_code_{number}.jpg"
-        img.save(filename, "JPEG")
+        img_with_text.save(filename, "JPEG")
         print_file(filename, True)
 
         print(f"QR code saved as {filename}")
 
     except Exception as e:
         print(f"Error generating QR code: {e}")
+
+def add_text_below_qr(qr_image, text):
+    """Adds the given text below the QR code."""
+    # Set up font (fallback to default if a font file is not available)
+    try:
+        font = ImageFont.truetype("arial.ttf", 72)  # Font size increased to 72
+    except IOError:
+        font = ImageFont.load_default()
+
+    # Get image size
+    qr_width, qr_height = qr_image.size
+    text_height = 120  # Increased space for larger text
+
+    # Create new image with extra space for text
+    new_img = Image.new("RGB", (qr_width, qr_height + text_height), "white")
+    new_img.paste(qr_image, (0, 0))
+
+    # Draw text on the new image
+    draw = ImageDraw.Draw(new_img)
+    bbox = draw.textbbox((0, 0), text, font=font)  # Corrected method
+    text_width = bbox[2] - bbox[0]  # Calculate text width
+    text_x = (qr_width - text_width) // 2
+    text_y = qr_height + 20  # Position text slightly lower for better spacing
+
+    draw.text((text_x, text_y), text, fill="black", font=font)
+
+    return new_img
 
 def wait_for_button_release():
     """Debounce and wait for button release."""
