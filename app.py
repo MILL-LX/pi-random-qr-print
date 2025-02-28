@@ -4,6 +4,8 @@ from PIL import Image
 import RPi.GPIO as GPIO
 import time
 
+from print_util import print_file
+
 # GPIO Pin Configuration
 SWITCH_PIN = 4  # Changed to GPIO 4
 
@@ -32,6 +34,7 @@ def generate_qr_code():
     img = img.convert("RGB")  # Ensure it's in RGB mode for JPG compatibility
     filename = f"data/qr_code_{number}.jpg"
     img.save(filename, "JPEG")
+    print_file(filename, True)
 
     print(f"QR code saved as {filename}")
 
