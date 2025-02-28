@@ -15,8 +15,8 @@ def setup_gpio():
     GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
 
 def generate_qr_code():
-    """Generates and saves a QR code with a random 5-digit number."""
-    number = "".join(random.sample("0123456789", 5))  # Unique 5-digit number
+    """Generates and saves a QR code with a random 4-digit number."""
+    number = "".join(random.sample("0123456789", 4))  # Unique 4-digit number
     print(f"Generating QR Code for: {number}")
 
     # Create a QR code
