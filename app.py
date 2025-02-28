@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import RPi.GPIO as GPIO
 import time
 import atexit
+from datetime import datetime
 from print_util import print_file
 
 SWITCH_PIN = 4  # GPIO 4
@@ -15,9 +16,11 @@ def setup_gpio():
     GPIO.setup(SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pull-up
 
 def generate_qr_code():
-    """Generates and saves a QR code with a random 4-digit number, adding the number below the QR code."""
+    """Generates and saves a QR code with a random 4-digit number, adding title, timestamp, and number below."""
     number = "".join(random.sample("0123456789", 4))  # Unique 4-digit number
-    print(f"Generating QR Code for: {number}")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Current date and time
+
+    print(f"Generating QR Code for: {number} at {timestamp}")
 
     if not os.path.exists("data"):
         os.makedirs("data")
@@ -32,7 +35,7 @@ def generate_qr_code():
         img = img.convert("RGB")
 
         # Add text below the QR code
-        img_with_text = add_text_below_qr(img, number)
+        img_with_text = add_text_below_qr(img, number, timestamp)
 
         # Save final image
         filename = f"data/qr_code_{number}.jpg"
@@ -44,17 +47,18 @@ def generate_qr_code():
     except Exception as e:
         print(f"Error generating QR code: {e}")
 
-def add_text_below_qr(qr_image, text):
-    """Adds the given text below the QR code using DejaVuSans-Bold.ttf at size 72."""
+def add_text_below_qr(qr_image, number, timestamp):
+    """Adds number (18pt under QR code), title ("Oficinas" & "Abertas" in 36pt), and timestamp (18pt) centered below."""
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    font_size = 72
+    
+    # Load fonts
+    font_number = ImageFont.truetype(font_path, 18)  # 4-digit number (now 18pt)
+    font_title = ImageFont.truetype(font_path, 36)  # "Oficinas" & "Abertas" in 36pt
+    font_timestamp = ImageFont.truetype(font_path, 18)  # Timestamp (now 18pt)
 
-    # Load the DejaVuSans-Bold font
-    font = ImageFont.truetype(font_path, font_size)
-
-    # Get image size
+    # Get QR image size
     qr_width, qr_height = qr_image.size
-    text_height = 120  # Extra space for large text
+    text_height = 200  # Adjusted extra space for number, title, and timestamp
 
     # Create new image with extra space for text
     new_img = Image.new("RGB", (qr_width, qr_height + text_height), "white")
@@ -62,12 +66,24 @@ def add_text_below_qr(qr_image, text):
 
     # Draw text on the new image
     draw = ImageDraw.Draw(new_img)
-    bbox = draw.textbbox((0, 0), text, font=font)  # Get text size
-    text_width = bbox[2] - bbox[0]  # Calculate text width
-    text_x = (qr_width - text_width) // 2
-    text_y = qr_height + 20  # Adjusted for spacing
 
-    draw.text((text_x, text_y), text, fill="black", font=font)
+    def draw_centered_text(text, font, y_offset):
+        """Helper function to center text on the image."""
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        x_pos = (qr_width - text_width) // 2
+        draw.text((x_pos, y_offset), text, fill="black", font=font)
+
+    # Position all text elements centered
+    number_y = qr_height + 10  # 10px below QR code
+    oficinas_y = number_y + 30  # 30px below the number
+    abertas_y = oficinas_y + 45  # 45px below "Oficinas"
+    timestamp_y = abertas_y + 45  # 45px below "Abertas"
+
+    draw_centered_text(number, font_number, number_y)
+    draw_centered_text("Oficinas", font_title, oficinas_y)
+    draw_centered_text("Abertas", font_title, abertas_y)
+    draw_centered_text(timestamp, font_timestamp, timestamp_y)
 
     return new_img
 
